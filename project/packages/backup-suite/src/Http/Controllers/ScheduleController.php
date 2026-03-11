@@ -100,7 +100,7 @@ class ScheduleController extends Controller
                 })
                 ->all();
         }
-        $defaults['file_paths'] = array_values(array_filter($paths));
+        $defaults['file_paths'] = array_values(array_filter(array_map('strval', array_filter($paths, fn($p) => $p !== null))));
 
         if (($data['type'] ?? null) !== 'weekly') {
             $data['day_of_week'] = null;

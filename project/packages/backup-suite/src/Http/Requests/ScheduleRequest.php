@@ -23,8 +23,8 @@ class ScheduleRequest extends FormRequest
             'day_of_month' => ['nullable', 'integer', 'between:1,31'],
             'month' => ['nullable', 'integer', 'between:1,12'],
             'enabled' => ['sometimes', 'boolean'],
-            'file_paths' => ['nullable', 'array'],
-            'file_paths.*' => ['string', 'max:255'],
+            'file_paths' => ['sometimes', 'nullable', 'array'],
+            'file_paths.*' => ['sometimes', 'nullable', 'string', 'max:255'],
         ];
     }
 
