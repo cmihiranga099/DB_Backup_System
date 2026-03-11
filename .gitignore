@@ -1,0 +1,28 @@
+# Laravel
+project/vendor/
+project/.env
+project/.env.backup
+project/storage/*.key
+project/storage/logs/*
+project/storage/framework/cache/*
+project/storage/framework/sessions/*
+project/storage/framework/views/*
+!project/storage/framework/cache/.gitkeep
+!project/storage/framework/sessions/.gitkeep
+!project/storage/framework/views/.gitkeep
+!project/storage/logs/.gitkeep
+
+# Node / Build
+project/node_modules/
+package-lock.json
+
+# Backups storage (generated files)
+project/storage/app/backups/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
