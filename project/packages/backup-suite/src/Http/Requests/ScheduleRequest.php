@@ -7,6 +7,14 @@ use Illuminate\Validation\Rule;
 
 class ScheduleRequest extends FormRequest
 {
+    protected function prepareForValidation(): void
+    {
+        // Strip seconds from time if browser submits H:i:s
+        if ($this->has('time') && preg_match('/^\d{2}:\d{2}:\d{2}$/', $this->input('time'))) {
+            $this->merge(['time' => substr($this->input('time'), 0, 5)]);
+        }
+    }
+
     public function rules(): array
     {
         return [

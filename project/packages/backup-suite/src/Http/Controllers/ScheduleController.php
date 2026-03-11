@@ -39,7 +39,7 @@ class ScheduleController extends Controller
     {
         $data = $this->normalize($request->validated());
         $schedule = BackupSchedule::create($data);
-        $schedule->next_run_at = $schedule->computeNextRun();
+        $schedule->next_run_at = $schedule->computeNextRun()->utc();
         $schedule->save();
 
         return redirect()->back()->with('status', 'Schedule created.');
@@ -49,7 +49,7 @@ class ScheduleController extends Controller
     {
         $data = $this->normalize($request->validated());
         $schedule->update($data);
-        $schedule->next_run_at = $schedule->computeNextRun();
+        $schedule->next_run_at = $schedule->computeNextRun()->utc();
         $schedule->save();
 
         return redirect()->back()->with('status', 'Schedule updated.');

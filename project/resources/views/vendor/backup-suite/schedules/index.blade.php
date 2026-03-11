@@ -335,7 +335,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-slate-700 mb-1">Timezone</label>
-                    <input id="d-timezone" name="timezone" value="{{ old('timezone', config('backup-suite.timezone','UTC')) }}"
+                    <input id="d-timezone" name="timezone" value="{{ old('timezone', config('backup-suite.timezone','Asia/Colombo')) }}"
                         placeholder="Asia/Colombo"
                         class="w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm focus:ring-2 focus:ring-slate-400 focus:outline-none" />
                 </div>
@@ -462,7 +462,8 @@ function openDrawer(mode, schedule = null) {
         desc.textContent  = 'Configure timing and backup destination.';
         form.action       = baseUrl;
         document.getElementById('d-time').value = '02:00';
-        document.getElementById('d-timezone').value = '{{ config('backup-suite.timezone','UTC') }}';
+        document.getElementById('d-timezone').value = '{{ config('backup-suite.timezone','Asia/Colombo') }}';
+        document.getElementById('d-start_date').value = new Date().toISOString().split('T')[0];
     } else {
         title.textContent = 'Edit Schedule';
         desc.textContent  = 'Update the schedule settings.';

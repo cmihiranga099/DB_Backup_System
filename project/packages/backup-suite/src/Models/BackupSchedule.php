@@ -38,7 +38,7 @@ class BackupSchedule extends Model
 
     public function isExpired(): bool
     {
-        return $this->end_date && $this->end_date->isPast();
+        return $this->end_date && $this->end_date->endOfDay()->isPast();
     }
 
     public function project()
@@ -67,9 +67,9 @@ class BackupSchedule extends Model
         $reference = $from ? $from->copy()->setTimezone($tz) : Carbon::now($tz);
 
         if ($this->start_date) {
-            $start = Carbon::parse($this->start_date . ' ' . $this->time, $tz);
-            if ($start->greaterThan($reference)) {
-                $reference = $start;
+            $startOfDay = Carbon::parse($this->start_date->format('Y-m-d') . ' 00:00:00', $tz);
+            if ($startOfDay->greaterThan($reference)) {
+                $reference = $startOfDay;
             }
         }
 
