@@ -1,0 +1,28 @@
+{
+    "name": "backup-suite/backup-suite",
+    "description": "Database backup scheduler with Google Drive upload and Blade UI for Laravel projects.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "BackupSuite\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "BackupSuite\\BackupSuiteServiceProvider"
+            ]
+        }
+    },
+    "require": {
+        "php": "^8.2",
+        "illuminate/support": "^12.0",
+        "dragonmantank/cron-expression": "^3.3"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0"
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
