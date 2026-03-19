@@ -23,6 +23,7 @@ class ProjectController extends Controller
         $data = $request->validate([
             'name'        => ['required', 'string', 'max:100'],
             'description' => ['nullable', 'string', 'max:500'],
+            'db_driver'   => ['required', 'string', 'in:mysql,pgsql,mongodb,sqlsrv,sqlite'],
             'db_host'     => ['required', 'string', 'max:255'],
             'db_port'     => ['required', 'integer', 'between:1,65535'],
             'db_database' => ['required', 'string', 'max:100'],
@@ -39,6 +40,7 @@ class ProjectController extends Controller
         $data = $request->validate([
             'name'        => ['required', 'string', 'max:100'],
             'description' => ['nullable', 'string', 'max:500'],
+            'db_driver'   => ['required', 'string', 'in:mysql,pgsql,mongodb,sqlsrv,sqlite'],
             'db_host'     => ['required', 'string', 'max:255'],
             'db_port'     => ['required', 'integer', 'between:1,65535'],
             'db_database' => ['required', 'string', 'max:100'],

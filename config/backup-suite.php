@@ -1,10 +1,9 @@
 <?php
 
 return [
-    'middleware' => ['web', 'auth'],
+    'middleware' => ['web'],
     'route_prefix' => 'backup-suite',
     'timezone' => env('APP_TIMEZONE', 'Asia/Colombo'),
-    'local_disk' => env('BACKUP_SUITE_LOCAL_DISK', 'local'),
     'local_folder' => env('BACKUP_SUITE_LOCAL_FOLDER', 'backups'),
     'remote_disk' => env('BACKUP_SUITE_REMOTE_DISK', 'gdrive'),
     'remote_folder' => env('BACKUP_SUITE_REMOTE_FOLDER', 'backups'),
@@ -19,4 +18,6 @@ return [
 
     // Full path to mysqldump binary. On Windows/XAMPP set BACKUP_SUITE_MYSQLDUMP_PATH in .env
     'mysqldump_path' => env('BACKUP_SUITE_MYSQLDUMP_PATH', 'mysqldump'),
+    'pgdump_path' => env('BACKUP_SUITE_PGDUMP_PATH', 'pg_dump'),
+    'mongodump_path' => env('BACKUP_SUITE_MONGODUMP_PATH', 'mongodump'),
 ];

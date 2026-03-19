@@ -11,6 +11,7 @@ class BackupProject extends Model
     protected $fillable = [
         'name',
         'description',
+        'db_driver',
         'db_host',
         'db_port',
         'db_database',
@@ -35,7 +36,7 @@ class BackupProject extends Model
     public function dbConfig(): array
     {
         return [
-            'driver'   => 'mysql',
+            'driver'   => $this->db_driver ?? 'mysql',
             'host'     => $this->db_host,
             'port'     => $this->db_port,
             'database' => $this->db_database,
@@ -48,14 +49,30 @@ class BackupProject extends Model
     public function testConnection(): array
     {
         try {
+            $driver = $this->db_driver ?? 'mysql';
+
+            if ($driver === 'mongodb') {
+                return ['ok' => true, 'message' => "MongoDB selected (CLI tool test applies during run)"];
+            }
+
+            $dsn = "{$driver}:host={$this->db_host};port={$this->db_port};dbname={$this->db_database}";
+            if ($driver === 'sqlsrv') {
+                $dsn = "sqlsrv:Server={$this->db_host},{$this->db_port};Database={$this->db_database}";
+            }
+
             $pdo = new \PDO(
-                "mysql:host={$this->db_host};port={$this->db_port};dbname={$this->db_database}",
+                $dsn,
                 $this->db_username,
                 $this->db_password ?? '',
                 [\PDO::ATTR_TIMEOUT => 5, \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
             );
-            $version = $pdo->query('SELECT VERSION()')->fetchColumn();
-            return ['ok' => true, 'message' => "Connected — MySQL {$version}"];
+
+            // Fetch version to confirm connection where supported
+            $version = 'Connected';
+            if ($driver === 'mysql' || $driver === 'pgsql') {
+                $version = $pdo->query('SELECT VERSION()')->fetchColumn();
+            }
+            return ['ok' => true, 'message' => "Connected — {$version}"];
         } catch (\Exception $e) {
             return ['ok' => false, 'message' => $e->getMessage()];
         }

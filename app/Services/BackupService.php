@@ -57,7 +57,7 @@ class BackupService
     protected function generateBackup(?BackupSchedule $schedule, string $filename, string $mode, ?BackupProject $project = null): array
     {
         if ($mode === 'database') {
-            $path = $this->dumpDatabase($filename . '.sql', $project);
+            $path = $this->dumpDatabase($filename, $project);
             $size = Storage::disk($this->localDisk())->size($path);
             return [$path, $size];
         }
@@ -70,11 +70,10 @@ class BackupService
             }
 
             if ($mode === 'both') {
-                $sqlName = $filename . '.sql';
-                $sqlPath = $this->dumpDatabase($sqlName, $project);
+                $dumpPath = $this->dumpDatabase($filename, $project);
                 $disk = Storage::disk($this->localDisk());
-                if ($disk->exists($sqlPath)) {
-                    $zip->addFromString($sqlName, $disk->get($sqlPath));
+                if ($disk->exists($dumpPath)) {
+                    $zip->addFromString(basename($dumpPath), $disk->get($dumpPath));
                 }
             }
         });
@@ -92,9 +91,9 @@ class BackupService
             $config = Config::get("database.connections.$connection");
         }
 
-        if (($config['driver'] ?? 'mysql') !== 'mysql') {
-            throw new Exception('Only MySQL backups are supported in this build.');
-        }
+        $driver = $config['driver'] ?? 'mysql';
+        $ext = $driver === 'mongodb' ? '.archive' : '.sql';
+        $filename = $filename . $ext;
 
         $disk = Storage::disk($this->localDisk());
         $folder = trim(config('backup-suite.local_folder', 'backups'), '/');
@@ -103,22 +102,54 @@ class BackupService
         $path = $folder . '/' . $filename;
         $fullPath = $disk->path($path);
 
-        $cmd = [
-            config('backup-suite.mysqldump_path', 'mysqldump'),
-            '--host=' . $config['host'],
-            '--port=' . ($config['port'] ?? 3306),
-            '--user=' . $config['username'],
-            '--password=' . ($config['password'] ?? ''),
-            '--result-file=' . $fullPath,
-            $config['database'],
-        ];
+        $cmd = [];
+        if ($driver === 'mysql') {
+            $cmd = [
+                config('backup-suite.mysqldump_path', 'mysqldump'),
+                '--host=' . $config['host'],
+                '--port=' . ($config['port'] ?? 3306),
+                '--user=' . $config['username'],
+                '--password=' . ($config['password'] ?? ''),
+                '--result-file=' . $fullPath,
+                $config['database'],
+            ];
+        } elseif ($driver === 'pgsql') {
+            // Need to set PGPASSWORD env variable since pg_dump doesn't accept password flag securely
+            $cmd = [
+                config('backup-suite.pgdump_path', 'pg_dump'),
+                '-h', $config['host'],
+                '-p', (string) ($config['port'] ?? 5432),
+                '-U', $config['username'],
+                '-F', 'p', // plain text sql
+                '-f', $fullPath,
+                $config['database'],
+            ];
+        } elseif ($driver === 'mongodb') {
+            $cmd = [
+                config('backup-suite.mongodump_path', 'mongodump'),
+                '--host=' . $config['host'],
+                '--port=' . ($config['port'] ?? 27017),
+                '--db=' . $config['database'],
+                '--archive=' . $fullPath,
+            ];
+            if (!empty($config['username'])) {
+                $cmd[] = '--username=' . $config['username'];
+                $cmd[] = '--password=' . ($config['password'] ?? '');
+            }
+        } else {
+            throw new Exception("Driver {$driver} is not fully supported for dumping yet.");
+        }
 
         $process = new Process($cmd);
-        $process->setTimeout(300);
+        if ($driver === 'pgsql' && !empty($config['password'])) {
+            $process->setEnv(['PGPASSWORD' => $config['password']]);
+        }
+        
+        $process->setTimeout(600);
         $process->run();
 
         if (!$process->isSuccessful()) {
-            throw new Exception('mysqldump failed: ' . $process->getErrorOutput());
+            throw new Exception("Database dump failed ({$driver}): " . escapeshellarg($process->getErrorOutput()));
         }
 
         return $path;

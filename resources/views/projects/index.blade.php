@@ -63,8 +63,10 @@
                 <div class="px-5 py-3 space-y-1.5">
                     <div class="flex items-center gap-2 text-xs text-slate-500">
                         <svg class="w-3.5 h-3.5 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M12 5l7 7-7 7"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                         </svg>
+                        <span class="font-mono truncate font-semibold">{{ strtoupper($project->db_driver ?? 'mysql') }}</span>
+                        <span class="text-slate-300">·</span>
                         <span class="font-mono truncate">{{ $project->db_host }}:{{ $project->db_port }}</span>
                     </div>
                     <div class="flex items-center gap-2 text-xs text-slate-500">
@@ -168,6 +170,17 @@
         <hr class="border-slate-200">
         <p class="text-xs font-bold text-slate-500 uppercase tracking-wider">Database Connection</p>
 
+        {{-- Driver --}}
+        <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1.5">Database Type <span class="text-rose-500">*</span></label>
+            <select name="db_driver" id="field_db_driver" required
+                class="w-full px-3 py-2.5 text-sm rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-400 focus:border-transparent">
+                <option value="mysql">MySQL / MariaDB</option>
+                <option value="pgsql">PostgreSQL</option>
+                <option value="mongodb">MongoDB</option>
+            </select>
+        </div>
+
         {{-- Host + Port --}}
         <div class="grid grid-cols-3 gap-3">
             <div class="col-span-2">
@@ -255,9 +268,14 @@ function openProjectDrawer(mode, project = null) {
         document.getElementById('drawerTitle').textContent = 'Add Project';
         document.getElementById('formMethod').value = 'POST';
         document.getElementById('projectForm').action = baseUrl;
-        ['name','description','db_host','db_port','db_database','db_username','db_password'].forEach(f => {
+        ['name','description','db_driver','db_host','db_port','db_database','db_username','db_password'].forEach(f => {
             const el = document.getElementById('field_' + f);
-            if (el) el.value = f === 'db_host' ? '127.0.0.1' : (f === 'db_port' ? '3306' : '');
+            if (el) {
+                if (f === 'db_host') el.value = '127.0.0.1';
+                else if (f === 'db_port') el.value = '3306';
+                else if (f === 'db_driver') el.value = 'mysql';
+                else el.value = '';
+            }
         });
     } else {
         currentProjectId = project.id;
@@ -266,6 +284,7 @@ function openProjectDrawer(mode, project = null) {
         document.getElementById('projectForm').action = baseUrl + '/' + project.id;
         document.getElementById('field_name').value = project.name || '';
         document.getElementById('field_description').value = project.description || '';
+        document.getElementById('field_db_driver').value = project.db_driver || 'mysql';
         document.getElementById('field_db_host').value = project.db_host || '127.0.0.1';
         document.getElementById('field_db_port').value = project.db_port || 3306;
         document.getElementById('field_db_database').value = project.db_database || '';

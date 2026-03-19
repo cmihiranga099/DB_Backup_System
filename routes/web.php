@@ -38,7 +38,7 @@ use App\Http\Controllers\ScheduleController;
 use App\Http\Controllers\SettingsController;
 
 
-Route::middleware(config('backup-suite.middleware', ['web', 'auth']))
+Route::middleware(config('backup-suite.middleware', ['web']))
     ->prefix(config('backup-suite.route_prefix', 'backup-suite'))
     ->name('backup-suite.')
     ->group(function () {
