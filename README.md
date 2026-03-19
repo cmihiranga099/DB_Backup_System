@@ -1,112 +1,59 @@
-# DB Backup System
+<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-A Laravel 12 database backup management system built as a self-contained local package. Schedule, run, and store database backups with automatic Google Drive upload and a clean admin UI.
+<p align="center">
+<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
+<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
+</p>
 
-## Features
+## About Laravel
 
-- **Multi-project support** — register multiple Laravel applications and back up each project's database independently
-- **Flexible scheduling** — daily, weekly, monthly, yearly, and custom cron expressions
-- **Google Drive upload** — automatic off-site backup after every run; credentials configured through the UI (no `.env` editing)
-- **Backup history** — filterable log of all runs with status, file size, duration, and direct download
-- **Manual backups** — trigger an immediate backup from the dashboard at any time
-- **Per-schedule toggle** — enable or disable individual schedules without deleting them
-- **Auto-expiry** — schedules with an end date disable themselves automatically
-- **Sidebar UI** — fixed sidebar navigation with right-side slide-in drawer for create/edit
+Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
 
-## Tech Stack
+- [Simple, fast routing engine](https://laravel.com/docs/routing).
+- [Powerful dependency injection container](https://laravel.com/docs/container).
+- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
+- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
+- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
+- [Robust background job processing](https://laravel.com/docs/queues).
+- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
 
-| Layer | Choice |
-|---|---|
-| Framework | Laravel 12 |
-| Frontend CSS | Tailwind CSS v4 (`@tailwindcss/vite`) |
-| Asset build | Vite 7 |
-| Google Drive | `masbug/flysystem-google-drive-ext` |
-| DB dump | `mysqldump` (path configurable) |
-| Queue | Sync (immediate execution) |
+Laravel is accessible, powerful, and provides tools required for large, robust applications.
 
-## Package Structure
+## Learning Laravel
 
-```
-packages/backup-suite/
-├── config/backup-suite.php          # Package configuration
-├── database/migrations/             # All DB schema
-├── resources/views/                 # Blade views (layouts, schedules, history, settings, projects)
-├── routes/web.php                   # All package routes
-└── src/
-    ├── BackupSuiteServiceProvider.php
-    ├── Console/                     # Artisan commands (dispatch, install, run, toggle)
-    ├── Http/
-    │   ├── Controllers/             # Schedule, History, Settings, Project controllers
-    │   └── Requests/ScheduleRequest.php
-    ├── Jobs/RunBackupJob.php
-    ├── Models/                      # BackupSchedule, BackupRun, BackupSetting, BackupProject
-    └── Services/
-        ├── BackupService.php        # Core backup logic (dump + zip + upload)
-        ├── GoogleDriveService.php   # Drive credential management and disk registration
-        └── ScheduleRegistrar.php    # Next-run calculation and scheduler integration
-```
+Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
 
-## Installation
+If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
 
-```bash
-# 1. Clone and install dependencies
-git clone https://github.com/cmihiranga099/DB_Backup_System.git
-cd DB_Backup_System/project
-composer install
-npm install && npm run build
+## Laravel Sponsors
 
-# 2. Configure environment
-cp .env.example .env
-php artisan key:generate
+We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
 
-# Edit .env — set DB_DATABASE, DB_USERNAME, DB_PASSWORD
-# For Windows/XAMPP, also set:
-# BACKUP_SUITE_MYSQLDUMP_PATH=C:/xampp/mysql/bin/mysqldump.exe
+### Premium Partners
 
-# 3. Run migrations
-php artisan migrate
+- **[Vehikl](https://vehikl.com)**
+- **[Tighten Co.](https://tighten.co)**
+- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
+- **[64 Robots](https://64robots.com)**
+- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
+- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
+- **[Redberry](https://redberry.international/laravel-development)**
+- **[Active Logic](https://activelogic.com)**
 
-# 4. Start dev server
-php artisan serve
-```
+## Contributing
 
-## Accessing the UI
+Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
 
-Navigate to `http://localhost:8000/backup-suite`
+## Code of Conduct
 
-| Route | Description |
-|---|---|
-| `/backup-suite/projects` | Manage Laravel projects |
-| `/backup-suite` | Schedule management dashboard |
-| `/backup-suite/history` | Backup history and downloads |
-| `/backup-suite/settings` | Google Drive OAuth2 credentials |
+In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
 
-## Google Drive Setup
+## Security Vulnerabilities
 
-1. Go to **Settings** in the sidebar
-2. Follow the on-screen guide to create a Google Cloud OAuth2 client
-3. Enter Client ID, Client Secret, Refresh Token, and Folder ID
-4. Click **Test Connection** to verify
-
-## Automating Schedules (Production)
-
-Add to crontab:
-```cron
-* * * * * cd /path/to/project && php artisan schedule:run >> /dev/null 2>&1
-```
-
-The package registers `php artisan backup-suite:dispatch` to run every minute and fires due schedules.
-
-## Environment Variables
-
-| Variable | Default | Description |
-|---|---|---|
-| `BACKUP_SUITE_MYSQLDUMP_PATH` | `mysqldump` | Full path to mysqldump binary |
-| `BACKUP_SUITE_LOCAL_DISK` | `local` | Laravel filesystem disk for local storage |
-| `BACKUP_SUITE_LOCAL_FOLDER` | `backups` | Subfolder within the local disk |
-| `BACKUP_SUITE_REMOTE_DISK` | `gdrive` | Filesystem disk for remote upload |
-| `BACKUP_SUITE_RETENTION` | `10` | Max backups to keep per schedule |
+If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
 
 ## License
 
-MIT
+The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
