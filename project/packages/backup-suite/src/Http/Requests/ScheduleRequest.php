@@ -26,7 +26,7 @@ class ScheduleRequest extends FormRequest
             'cron_expression' => ['nullable', 'string', 'max:120'],
             'start_date' => ['nullable', 'date'],
             'end_date'   => ['nullable', 'date', 'after_or_equal:start_date'],
-            'timezone' => ['nullable', 'string', 'max:120'],
+            'timezone' => ['nullable', 'string', 'max:120', 'timezone'],
             'day_of_week' => ['nullable', 'integer', 'between:0,6'],
             'day_of_month' => ['nullable', 'integer', 'between:1,31'],
             'month' => ['nullable', 'integer', 'between:1,12'],

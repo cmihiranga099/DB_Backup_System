@@ -75,8 +75,8 @@
                     @foreach($runs as $run)
                     <tr>
                         <td class="py-3 text-xs text-slate-600">
-                            {{ optional($run->started_at)->format('d M Y') }}<br>
-                            <span class="text-slate-400">{{ optional($run->started_at)->format('H:i:s') }}</span>
+                            {{ $run->started_at?->format('d M Y') }}<br>
+                            <span class="text-slate-400">{{ $run->started_at?->format('H:i:s') }}</span>
                         </td>
                         <td class="py-3 text-slate-700">{{ $run->schedule?->name ?? 'Manual' }}</td>
                         <td class="py-3 max-w-[160px] truncate text-slate-700 font-mono text-xs" title="{{ $run->filename }}">

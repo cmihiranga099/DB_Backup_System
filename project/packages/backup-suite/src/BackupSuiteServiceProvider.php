@@ -9,6 +9,7 @@ use BackupSuite\Console\BackupSuiteToggleCommand;
 use BackupSuite\Services\GoogleDriveService;
 use BackupSuite\Services\ScheduleRegistrar;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\ServiceProvider;
 
 class BackupSuiteServiceProvider extends ServiceProvider
@@ -43,9 +44,30 @@ class BackupSuiteServiceProvider extends ServiceProvider
             ]);
         }
 
+        $this->registerGoogleDriver();
         $this->bootRoutesMacro();
         $this->app->make(ScheduleRegistrar::class)->register();
         $this->app->make(GoogleDriveService::class)->registerDisk();
+    }
+
+    protected function registerGoogleDriver(): void
+    {
+        Storage::extend('google', function ($app, $config) {
+            $client = new \Google\Client();
+            $client->setClientId($config['clientId']);
+            $client->setClientSecret($config['clientSecret']);
+            $client->setAccessType('offline');
+            $client->fetchAccessTokenWithRefreshToken($config['refreshToken']);
+
+            $service  = new \Google\Service\Drive($client);
+            $adapter  = new \Masbug\Flysystem\GoogleDriveAdapter(
+                $service,
+                $config['folderId'] ?? '/'
+            );
+            $filesystem = new \League\Flysystem\Filesystem($adapter);
+
+            return new \Illuminate\Filesystem\FilesystemAdapter($filesystem, $adapter);
+        });
     }
 
     protected function bootRoutesMacro(): void

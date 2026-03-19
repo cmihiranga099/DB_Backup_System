@@ -17,6 +17,14 @@ class ScheduleController extends Controller
     public function index(): View
     {
         $schedules = BackupSchedule::with('project')->orderByDesc('created_at')->get();
+
+        // Refresh stale next_run_at for enabled schedules whose time has already passed
+        $schedules->filter(fn($s) => $s->enabled && $s->next_run_at?->isPast())
+            ->each(function ($s) {
+                $s->next_run_at = $s->computeNextRun();
+                $s->save();
+            });
+
         $recentRuns = BackupRun::with('schedule.project')->orderByDesc('created_at')->limit(10)->get();
         $projects = BackupProject::orderBy('name')->get();
 
@@ -39,7 +47,7 @@ class ScheduleController extends Controller
     {
         $data = $this->normalize($request->validated());
         $schedule = BackupSchedule::create($data);
-        $schedule->next_run_at = $schedule->computeNextRun()->utc();
+        $schedule->next_run_at = $schedule->computeNextRun();
         $schedule->save();
 
         return redirect()->back()->with('status', 'Schedule created.');
@@ -49,7 +57,7 @@ class ScheduleController extends Controller
     {
         $data = $this->normalize($request->validated());
         $schedule->update($data);
-        $schedule->next_run_at = $schedule->computeNextRun()->utc();
+        $schedule->next_run_at = $schedule->computeNextRun();
         $schedule->save();
 
         return redirect()->back()->with('status', 'Schedule updated.');

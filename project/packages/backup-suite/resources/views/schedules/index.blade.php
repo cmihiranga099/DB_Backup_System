@@ -133,15 +133,15 @@
                             @else —
                             @endif
                         </td>
-                        <td class="px-3 py-3 text-slate-600 text-xs font-mono">{{ $schedule->time }}</td>
+                        <td class="px-3 py-3 text-slate-600 text-xs font-mono">{{ substr($schedule->time, 0, 5) }}</td>
                         <td class="px-3 py-3 text-slate-400 text-xs">
-                            {{ optional($schedule->next_run_at)->format('d M Y H:i') ?? '—' }}
+                            {{ $schedule->next_run_at?->format('d M Y H:i') ?? '—' }}
                         </td>
                         <td class="px-3 py-3 text-xs">
                             @if($lastRun)
                                 @php $lc = ['success'=>'emerald','failed'=>'rose','running'=>'amber','pending'=>'slate'][$lastRun->status] ?? 'slate'; @endphp
                                 <span class="px-2 py-0.5 rounded-full bg-{{ $lc }}-100 text-{{ $lc }}-700 capitalize">{{ $lastRun->status }}</span>
-                                <div class="text-slate-400 mt-0.5 text-xs">{{ optional($lastRun->started_at)->diffForHumans() }}</div>
+                                <div class="text-slate-400 mt-0.5 text-xs">{{ $lastRun->started_at?->diffForHumans() }}</div>
                             @else
                                 <span class="text-slate-300">Never</span>
                             @endif
@@ -221,7 +221,7 @@
                             <span class="px-2 py-0.5 text-xs rounded-full bg-{{ $c }}-100 text-{{ $c }}-700 capitalize">{{ $run->status }}</span>
                         </td>
                         <td class="px-3 py-3 text-slate-500 text-xs">{{ $run->size_bytes ? number_format($run->size_bytes/1048576,2).' MB' : '—' }}</td>
-                        <td class="px-3 py-3 text-slate-400 text-xs">{{ optional($run->started_at)->format('d M H:i') ?? '—' }}</td>
+                        <td class="px-3 py-3 text-slate-400 text-xs">{{ $run->started_at?->format('d M H:i') ?? '—' }}</td>
                         <td class="px-3 py-3 text-slate-400 text-xs">
                             @if($run->started_at && $run->finished_at) {{ $run->finished_at->diffForHumans($run->started_at, true) }}
                             @else —
@@ -463,7 +463,7 @@ function openDrawer(mode, schedule = null) {
         form.action       = baseUrl;
         document.getElementById('d-time').value = '02:00';
         document.getElementById('d-timezone').value = '{{ config('backup-suite.timezone','Asia/Colombo') }}';
-        document.getElementById('d-start_date').value = new Date().toISOString().split('T')[0];
+        document.getElementById('d-start_date').value = new Date().toLocaleDateString('en-CA', { timeZone: '{{ config('backup-suite.timezone','Asia/Colombo') }}' });
     } else {
         title.textContent = 'Edit Schedule';
         desc.textContent  = 'Update the schedule settings.';

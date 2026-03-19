@@ -3,7 +3,7 @@
 return [
     'middleware' => ['web', 'auth'],
     'route_prefix' => 'backup-suite',
-    'timezone' => env('APP_TIMEZONE', 'UTC'),
+    'timezone' => env('APP_TIMEZONE', 'Asia/Colombo'),
     'local_disk' => env('BACKUP_SUITE_LOCAL_DISK', 'local'),
     'local_folder' => env('BACKUP_SUITE_LOCAL_FOLDER', 'backups'),
     'remote_disk' => env('BACKUP_SUITE_REMOTE_DISK', 'gdrive'),

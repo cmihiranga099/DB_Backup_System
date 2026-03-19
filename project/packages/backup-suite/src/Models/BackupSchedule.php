@@ -58,7 +58,13 @@ class BackupSchedule extends Model
 
     public function timezoneOrDefault(): string
     {
-        return $this->timezone ?: config('backup-suite.timezone');
+        $tz = $this->timezone ?: config('backup-suite.timezone', 'Asia/Colombo');
+        try {
+            new \DateTimeZone($tz);
+            return $tz;
+        } catch (\Exception $e) {
+            return config('backup-suite.timezone', 'Asia/Colombo');
+        }
     }
 
     public function computeNextRun(?Carbon $from = null): Carbon

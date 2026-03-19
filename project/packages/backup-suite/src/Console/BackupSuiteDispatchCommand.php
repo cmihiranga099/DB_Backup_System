@@ -33,7 +33,7 @@ class BackupSuiteDispatchCommand extends Command
                 return false;
             }
             if (!$schedule->next_run_at) {
-                $schedule->next_run_at = $schedule->computeNextRun($now)->utc();
+                $schedule->next_run_at = $schedule->computeNextRun($now);
                 $schedule->save();
             }
             return $schedule->next_run_at && $schedule->next_run_at->lessThanOrEqualTo($now);
@@ -41,7 +41,7 @@ class BackupSuiteDispatchCommand extends Command
 
         foreach ($due as $schedule) {
             RunBackupJob::dispatch($schedule->id, false);
-            $schedule->next_run_at = $schedule->computeNextRun($now)->utc();
+            $schedule->next_run_at = $schedule->computeNextRun($now);
             $schedule->save();
         }
 
