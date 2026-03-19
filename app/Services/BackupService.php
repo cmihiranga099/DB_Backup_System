@@ -66,7 +66,7 @@ class BackupService
         $zipPath = $this->zipPayload($zipName, function (ZipArchive $zip) use ($mode, $schedule, $filename, $project) {
             if ($mode === 'files' || $mode === 'both') {
                 $paths = $schedule?->file_paths ?? config('backup-suite.default_file_paths', []);
-                $this->addPathsToZip($zip, $paths);
+                $this->addPathsToZip($zip, $paths, $project);
             }
 
             if ($mode === 'both') {
@@ -175,10 +175,17 @@ class BackupService
         return $path;
     }
 
-    protected function addPathsToZip(ZipArchive $zip, array $paths): void
+    protected function addPathsToZip(ZipArchive $zip, array $paths, ?BackupProject $project = null): void
     {
         if (empty($paths)) {
             throw new Exception('No file paths configured for file backup.');
+        }
+
+        // If project has SSH, we use an on-the-fly SFTP disk
+        if ($project && $project->ssh_host) {
+            $sftpDisk = Storage::build($project->sftpConfig());
+            $this->addRemotePathsToZip($zip, $sftpDisk, $paths);
+            return;
         }
 
         foreach ($paths as $path) {
@@ -191,6 +198,43 @@ class BackupService
                 $this->addDirectoryToZip($zip, $absolute, trim($path, '/'));
             } else {
                 $zip->addFile($absolute, basename($absolute));
+            }
+        }
+    }
+
+    protected function addRemotePathsToZip(ZipArchive $zip, $sftpDisk, array $paths): void
+    {
+        foreach ($paths as $path) {
+            if (!$sftpDisk->exists($path)) {
+                continue;
+            }
+
+            if ($this->isRemoteDir($sftpDisk, $path)) {
+                $this->addRemoteDirectoryToZip($zip, $sftpDisk, $path);
+            } else {
+                $stream = $sftpDisk->readStream($path);
+                if ($stream) {
+                    $zip->addFromString(basename($path), stream_get_contents($stream));
+                    fclose($stream);
+                }
+            }
+        }
+    }
+
+    protected function isRemoteDir($disk, string $path): bool
+    {
+        // Simple heuristic for Flysystem
+        return $disk->directoryExists($path);
+    }
+
+    protected function addRemoteDirectoryToZip(ZipArchive $zip, $disk, string $dir): void
+    {
+        $files = $disk->allFiles($dir);
+        foreach ($files as $file) {
+            $stream = $disk->readStream($file);
+            if ($stream) {
+                $zip->addFromString($file, stream_get_contents($stream));
+                fclose($stream);
             }
         }
     }

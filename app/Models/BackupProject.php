@@ -17,9 +17,30 @@ class BackupProject extends Model
         'db_database',
         'db_username',
         'db_password',
+        'ssh_host',
+        'ssh_port',
+        'ssh_username',
+        'ssh_password',
+        'ssh_private_key',
     ];
 
     protected function dbPassword(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ? decrypt($value) : null,
+            set: fn ($value) => $value !== null ? encrypt($value) : null,
+        );
+    }
+
+    protected function sshPassword(): Attribute
+    {
+        return Attribute::make(
+            get: fn ($value) => $value ? decrypt($value) : null,
+            set: fn ($value) => $value !== null ? encrypt($value) : null,
+        );
+    }
+
+    protected function sshPrivateKey(): Attribute
     {
         return Attribute::make(
             get: fn ($value) => $value ? decrypt($value) : null,
@@ -42,6 +63,20 @@ class BackupProject extends Model
             'database' => $this->db_database,
             'username' => $this->db_username,
             'password' => $this->db_password ?? '',
+        ];
+    }
+
+    /** Return an array suitable for building an SFTP disk. */
+    public function sftpConfig(): array
+    {
+        return [
+            'driver'   => 'sftp',
+            'host'     => $this->ssh_host,
+            'port'     => (int) ($this->ssh_port ?? 22),
+            'username' => $this->ssh_username,
+            'password' => $this->ssh_password,
+            'privateKey' => $this->ssh_private_key,
+            'timeout'  => 30,
         ];
     }
 

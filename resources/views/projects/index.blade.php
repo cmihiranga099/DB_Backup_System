@@ -227,6 +227,43 @@
             </div>
         </div>
 
+        <div class="pt-2">
+            <button type="button" onclick="document.getElementById('sshSection').classList.toggle('hidden')"
+                class="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-wider hover:text-emerald-600 transition">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/></svg>
+                SSH / SFTP Connection (Optional)
+            </button>
+            <div id="sshSection" class="hidden mt-4 space-y-4 border-l-2 border-slate-100 pl-4 py-1">
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="col-span-2">
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">SSH Host</label>
+                        <input type="text" name="ssh_host" id="field_ssh_host" placeholder="123.123.123.123"
+                            class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Port</label>
+                        <input type="number" name="ssh_port" id="field_ssh_port" value="22"
+                            class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-400">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">SSH Username</label>
+                    <input type="text" name="ssh_username" id="field_ssh_username" placeholder="ubuntu"
+                        class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-400 font-mono">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">SSH Password</label>
+                    <input type="password" name="ssh_password" id="field_ssh_password" placeholder="(blank = keep current)"
+                        class="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-400 font-mono">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-slate-400 uppercase mb-1">Private Key</label>
+                    <textarea name="ssh_private_key" id="field_ssh_private_key" rows="3" placeholder="Paste -----BEGIN OPENSSH PRIVATE KEY----- here..."
+                        class="w-full px-3 py-2 text-[10px] rounded-lg border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-emerald-400 font-mono resize-none"></textarea>
+                </div>
+            </div>
+        </div>
+
         {{-- Test connection button (inside drawer) --}}
         <div>
             <button type="button" id="drawerTestBtn" onclick="testDrawerConnection()"
@@ -268,15 +305,17 @@ function openProjectDrawer(mode, project = null) {
         document.getElementById('drawerTitle').textContent = 'Add Project';
         document.getElementById('formMethod').value = 'POST';
         document.getElementById('projectForm').action = baseUrl;
-        ['name','description','db_driver','db_host','db_port','db_database','db_username','db_password'].forEach(f => {
+        ['name','description','db_driver','db_host','db_port','db_database','db_username','db_password','ssh_host','ssh_port','ssh_username','ssh_password','ssh_private_key'].forEach(f => {
             const el = document.getElementById('field_' + f);
             if (el) {
                 if (f === 'db_host') el.value = '127.0.0.1';
                 else if (f === 'db_port') el.value = '3306';
                 else if (f === 'db_driver') el.value = 'mysql';
+                else if (f === 'ssh_port') el.value = '22';
                 else el.value = '';
             }
         });
+        document.getElementById('sshSection').classList.add('hidden');
     } else {
         currentProjectId = project.id;
         document.getElementById('drawerTitle').textContent = 'Edit Project';
@@ -290,6 +329,18 @@ function openProjectDrawer(mode, project = null) {
         document.getElementById('field_db_database').value = project.db_database || '';
         document.getElementById('field_db_username').value = project.db_username || '';
         document.getElementById('field_db_password').value = '';
+
+        document.getElementById('field_ssh_host').value = project.ssh_host || '';
+        document.getElementById('field_ssh_port').value = project.ssh_port || 22;
+        document.getElementById('field_ssh_username').value = project.ssh_username || '';
+        document.getElementById('field_ssh_password').value = '';
+        document.getElementById('field_ssh_private_key').value = '';
+
+        if (project.ssh_host) {
+            document.getElementById('sshSection').classList.remove('hidden');
+        } else {
+            document.getElementById('sshSection').classList.add('hidden');
+        }
     }
 
     document.getElementById('drawerTestResult').classList.add('hidden');

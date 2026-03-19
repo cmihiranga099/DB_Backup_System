@@ -29,6 +29,11 @@ class ProjectController extends Controller
             'db_database' => ['required', 'string', 'max:100'],
             'db_username' => ['required', 'string', 'max:100'],
             'db_password' => ['nullable', 'string', 'max:255'],
+            'ssh_host'    => ['nullable', 'string', 'max:255'],
+            'ssh_port'    => ['nullable', 'integer', 'between:1,65535'],
+            'ssh_username'=> ['nullable', 'string', 'max:100'],
+            'ssh_password'=> ['nullable', 'string'],
+            'ssh_private_key' => ['nullable', 'string'],
         ]);
 
         BackupProject::create($data);
@@ -46,11 +51,22 @@ class ProjectController extends Controller
             'db_database' => ['required', 'string', 'max:100'],
             'db_username' => ['required', 'string', 'max:100'],
             'db_password' => ['nullable', 'string', 'max:255'],
+            'ssh_host'    => ['nullable', 'string', 'max:255'],
+            'ssh_port'    => ['nullable', 'integer', 'between:1,65535'],
+            'ssh_username'=> ['nullable', 'string', 'max:100'],
+            'ssh_password'=> ['nullable', 'string'],
+            'ssh_private_key' => ['nullable', 'string'],
         ]);
 
         // Keep existing password if blank
         if (empty($data['db_password'])) {
             unset($data['db_password']);
+        }
+        if (empty($data['ssh_password'])) {
+            unset($data['ssh_password']);
+        }
+        if (empty($data['ssh_private_key'])) {
+            unset($data['ssh_private_key']);
         }
 
         $project->update($data);
